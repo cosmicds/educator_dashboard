@@ -82,6 +82,8 @@ def DataSummary(roster = None, student_id = None, on_student_id = None, allow_cl
         return
     
     data = roster.get_class_data(df=True)
+    # add names
+    data['name'] = [roster.get_student_name(int(sid)) for sid in data['student_id']]
     
     if data is None:
         return
@@ -119,9 +121,9 @@ def DataSummary(roster = None, student_id = None, on_student_id = None, allow_cl
         
     
     if allow_click:
-        ClassPlot(data, on_click=on_plot_click, select_on = 'student_id', selected = student_id, allow_click=True, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB')
+        ClassPlot(data, on_click=on_plot_click, label_col='name', select_on = 'student_id', selected = student_id, allow_click=True, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB')
     else:
-        ClassPlot(data, select_on = 'student_id', selected = student_id, allow_click = False, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB')
+        ClassPlot(data, select_on = 'student_id', label_col='name', selected = student_id, allow_click = False, subset = subset, subset_label=subset_name, main_label=main_name, subset_color='#0097A7', main_color='#BBBBBB')
 
     
 
@@ -249,14 +251,17 @@ def DataHistogram(roster = None, id_col = 'student_id',  sid = None):
     if len(dataframe) == 0:
         solara.Markdown("There is no data for this class")
         return
-
+    
+    #group by student_id
     grouped = dataframe.groupby(id_col)
     h0 = grouped.apply(lambda x: get_slope(x['est_dist_value'].to_numpy(), x['velocity_value'].to_numpy()))
+    # get the name associated with the student_id
     age = h0.apply(slope2age)
     time = grouped['last_modified'].max()
-    data = DataFrame({'h0': h0, 'age': age, 'last_modified': time}).reset_index()
+    data = DataFrame({'h0': h0, 'age': age, 'last_modified': time}).reset_index() # move student_id to column
     # student_id to str
     data['student_id'] = data['student_id'].apply(str)
+    data['name'] = [roster.get_student_name(int(sid)) for sid in data['student_id']]
     data['h0'] = data['h0'].apply(lambda x: around(x,0))
     data['age'] = data['age'].apply(lambda x: around(x,0))
     

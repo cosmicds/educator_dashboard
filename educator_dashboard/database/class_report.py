@@ -4,7 +4,7 @@ import pandas as pd
 from .nested_dataframe import flatten
 from .State import State, StateList
 from .Query import QueryCosmicDSApi
-
+import time
 HUBBLE_ROUTE_PATH = "hubbles_law"
 
 import astropy.units as u
@@ -54,6 +54,8 @@ class Roster():
         self.student_data = {}
         self.class_summary = None
         self.grab_data()
+        self.has_real_names = False
+        self.real_names =  None
     
     def __eq__(self, other):
         if other.short_report() is None:
@@ -291,7 +293,13 @@ class Roster():
         
     
     def get_questions_text(self):
-        return self.query.get_questions()
+        qs = self.query.get_questions()
+        if qs is None:
+            print("""No questions found. Trying again after a moment.""")
+            # wait 1 second
+            time.sleep(1)
+            qs = self.query.get_questions()
+        return qs
     
     def question_keys(self, testing = False, get_all = True):
         if (self._question_keys is not None) and (not self._refresh):
@@ -380,8 +388,13 @@ class Roster():
                 if student_names is None:
                     # use random string
                     student['student']['name'] = 'Student '+str(student['student_id'])
+                    # student['student']['name'] = student['username']
                 else:
                     student['student']['name'] = student_names.get(student['student_id'], 'Student '+str(student['student_id']))
+                    
+            # if student_names is not None:
+        self.has_real_names = True
+        self.real_names = student_names
     
     def get_student_name(self, sid = None):
         if sid is None:
@@ -389,7 +402,7 @@ class Roster():
         if len(self.roster) > 0:
             index = self.student_ids.index(sid) if sid in self.student_ids else None
             if index is not None:
-                return self.roster[index]['student'].get('name', sid)
+                return self.roster[index]['student'].get('name', str(sid))
             else:
                 print(f'{sid} not in roster')
         

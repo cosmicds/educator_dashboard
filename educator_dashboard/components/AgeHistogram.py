@@ -30,9 +30,11 @@ def AgeHoHistogram(data, which = 'age', subset = None, subset_label = None, main
     # df_agg.sids = df_agg.sids.apply(lambda x:'<br>' + '<br>'.join(x))
     def sids_agg(sids):
         return '<br>'+ '<br>'.join(sids)
+    def name_agg(names):
+        return '<br>'+ '<br>'.join(names)
     
 
-    df_agg = data.groupby(which, as_index=False).agg(count=(which,'size'), student_id = ('student_id', sids_agg))
+    df_agg = data.groupby(which, as_index=False).agg(count=(which,'size'), student_id = ('student_id', sids_agg), name = ('name', name_agg))
     # add single valued column
     df_agg['group'] = 'Full Class'
     if len(df_agg) == 0:
@@ -40,9 +42,9 @@ def AgeHoHistogram(data, which = 'age', subset = None, subset_label = None, main
     else:
         xmin, xmax = nanmin(df_agg[which]), nanmax(df_agg[which])
 
-    labels = {'age':'Age of Universe (Gyr)', 'student_id':'Student ID', 'h0':'Hubble Constant (km/s/Mpc)'}
+    labels = {'age':'Age of Universe (Gyr)', 'student_id':'Student', 'name': 'Student', 'h0':'Hubble Constant (km/s/Mpc)'}
 
-    fig = px.bar(data_frame = df_agg, x = which, y='count', hover_data='student_id', labels = labels, barmode='overlay', opacity=1)
+    fig = px.bar(data_frame = df_agg, x = which, y='count', hover_data='name', labels = labels, barmode='overlay', opacity=1)
     fig.update_traces(hovertemplate = labels[which] + ': %{x}<br>' + 'count=%{y}<br>' + labels['student_id'] + ': %{customdata}' + '<extra></extra>', width=0.8)
 
     if subset is None:

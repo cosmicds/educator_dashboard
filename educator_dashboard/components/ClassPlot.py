@@ -68,7 +68,7 @@ def ClassPlot(dataframe,
 
     xlabel = xy_label["x"]['label']+': %{x:f} ' + xy_label["x"]['units']
     ylabel = xy_label["y"]['label']+': %{y:f} ' + xy_label["y"]['units']
-    hovertemplate = xlabel + '<br>' + ylabel + '<br>Student ID: %{customdata}' 
+    hovertemplate = xlabel + '<br>' + ylabel + '<br>Student: %{customdata}' 
     
     fig.update_traces(hovertemplate=hovertemplate) 
     
