@@ -164,8 +164,6 @@ class QueryCosmicDSApi():
         
         if student_ids is None:
             measurements = self.get_hubble_class_measurements(class_id, exclude_merge=exclude_merge)["measurements"]
-            for m in measurements:
-                print(m["student_id"])
             # check that there are measurements for every student_id
         else:
             if isinstance(student_ids, int):
