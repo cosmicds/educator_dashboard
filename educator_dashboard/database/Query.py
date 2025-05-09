@@ -150,35 +150,23 @@ class QueryCosmicDSApi():
             logger.debug(req.text)
             return None
     
-    def get_class_data(self, class_id = None, student_ids = None, story = None):
+    def get_class_data(self, class_id = None, student_ids = None, story = None, exclude_merge=False):
         class_id = self.class_id or class_id
         story = self.story or story
 
-        ## Can also use stage-3-data enpoint to get the data
-        ## this is a little fast since it runs on the serve
-        ## but I feel like /all-data is more robust
         roster = self.get_roster(class_id, story = story)
         student_id = [student['student_id'] for student in roster]
         if len(student_id) == 0:
             return None
         
-        # endpoint = f"{story}/stage-3-data/{student_id}/{class_id}"
-        # url = '/'.join([self.url_head, endpoint])
-        # self.class_summary_url = url
-        # req = self.get(url)
-        # try:
-        #     return self.l2d(req.json()['measurements'])
-        # except json.JSONDecodeError:
-        #     logger.debug(req.text)
-        #     return None
-        
         if (class_id is None) and (student_ids is None):
             return None
         
         if student_ids is None:
-            filter_fun = lambda m: m['class_id'] == class_id and m['student_id'] in student_id
-            measurements = [m for m in self.get_all_data(story = story, transpose = False)['measurements'] if filter_fun(m)]
-            # check that there are measurements for every student_id   
+            measurements = self.get_hubble_class_measurements(class_id, exclude_merge=exclude_merge)["measurements"]
+            for m in measurements:
+                print(m["student_id"])
+            # check that there are measurements for every student_id
         else:
             if isinstance(student_ids, int):
                 student_ids = [student_ids]
@@ -209,6 +197,10 @@ class QueryCosmicDSApi():
             filt = lambda m: m['class_id'] == class_id
             return self.l2d([m for m in  summary['studentData'] if filt(m)])
         
+    def get_hubble_class_measurements(self, class_id, complete_only=True, exclude_merge=False):
+        query = f"complete_only={str(complete_only).lower()}&exclude_merge={str(exclude_merge).lower()}"
+        url = f"{self.url_head}/hubbles_law/measurements/classes/{class_id}?{query}"
+        return self.get(url).json()
     
     def get_all_data(self, story = None, transpose = True):
         story = self.story or story

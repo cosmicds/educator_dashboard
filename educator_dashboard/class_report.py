@@ -274,9 +274,9 @@ class Roster():
     def l2d(self, list_of_dicts, fill_val=None):
         return l2d(list_of_dicts, fill_val)
 
-    def get_class_data(self, refresh: bool = False, df: bool = False) -> Union[Dict, pd.DataFrame]:
+    def get_class_data(self, refresh: bool = False, df: bool = False, exclude_merge: bool = False) -> Union[Dict, pd.DataFrame]:
         if self.data is None or self._refresh or refresh:
-            res = self.query.get_class_data(class_id=self.class_id)
+            res = self.query.get_class_data(class_id=self.class_id, exclude_merge=exclude_merge)
             if res is None or res == {} or len(res) == 0:
                 res = {'student_id': []}
             self.data = res if res is not None else {'student_id': []}
